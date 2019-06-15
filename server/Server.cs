@@ -27,7 +27,14 @@ namespace server
             reactorThread = new Thread(() => {
                 while (true) {
                     // TODO Ping each connected client.
-                    // TODO Receive incoming messages.
+                    
+                    // Check and receive the data from the UDP socket.
+                    while (udpClient.Available != 0) {
+                        IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                        byte[] received = udpClient.Receive(ref ipEndPoint);
+                        Console.WriteLine("> " + Encoding.UTF8.GetString(received));
+                    }
+
                     // TODO Send outgoing messages.
                     Thread.Sleep(1);
                 }
