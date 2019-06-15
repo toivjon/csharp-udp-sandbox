@@ -22,7 +22,7 @@ namespace client
             this.udpClient = new UdpClient();
         }
 
-        public void run(string host, int port) {
+        public void Run(string host, int port) {
             reactorThread = new Thread(() => {
                 while (true) {
                     // TODO Ping each connected client.
@@ -35,15 +35,15 @@ namespace client
             reactorThread.Start();
         }
 
-        public void close() {
+        public void Close() {
             reactorThread.Abort();
         }
         static void Main(string[] args) {
             Client client = new Client();
-            client.run("localhost", 28018);
+            client.Run("localhost", 28018);
 
             Console.ReadKey();
-            client.close();
+            client.Close();
         }
     }
 }
