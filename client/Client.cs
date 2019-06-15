@@ -7,18 +7,31 @@ namespace client
 {
     class Client
     {
-        static void Main(string[] args)
-        {
-            Byte[] bytes = Encoding.UTF8.GetBytes("Hello from client!");
-            IPEndPoint serverIp = new IPEndPoint(IPAddress.Any, 0);
+        // The IP end point address of the server.
+        private IPEndPoint serverIp;
 
-            UdpClient client = new UdpClient();
-            client.Connect("localhost", 28018);
-            client.Send(bytes, bytes.Length);
-            byte[] incoming = client.Receive(ref serverIp);
-            client.Close();
+        // The UDP client abstraction for the UDP communication.
+        private UdpClient udpClient;
+
+        public Client() {
+            this.serverIp = new IPEndPoint(IPAddress.Any, 0);
+            this.udpClient = new UdpClient();
+        }
+
+        public void run(string host, int port) {
+            udpClient.Connect(host, port);
+            Byte[] outgoing = Encoding.UTF8.GetBytes("Hello from client!");
+            udpClient.Send(outgoing, outgoing.Length);
+            byte[] incoming = udpClient.Receive(ref serverIp);
+            udpClient.Close();
 
             Console.WriteLine("Received data: " + Encoding.UTF8.GetString(incoming));
+        }
+
+        static void Main(string[] args)
+        {
+            Client client = new Client();
+            client.run("localhost", 28018);
 
             Console.ReadKey();
         }
