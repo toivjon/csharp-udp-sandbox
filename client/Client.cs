@@ -28,8 +28,7 @@ namespace client
             Console.WriteLine("Received data: " + Encoding.UTF8.GetString(incoming));
         }
 
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
             Client client = new Client();
             client.run("localhost", 28018);
 
