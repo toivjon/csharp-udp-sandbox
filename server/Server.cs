@@ -12,6 +12,8 @@ namespace server
             IPEndPoint clientIp = new IPEndPoint(IPAddress.Any, 0);
             UdpClient client = new UdpClient(28018);
             byte[] received = client.Receive(ref clientIp);
+            byte[] outgoing = Encoding.UTF8.GetBytes("Thanks for the message! Bye bye!");
+            client.Send(outgoing, outgoing.Length, clientIp);
             client.Close();
 
             Console.WriteLine("Received data: " + Encoding.UTF8.GetString(received));
