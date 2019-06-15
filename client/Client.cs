@@ -30,7 +30,7 @@ namespace client
                     // TODO Send outgoing messages.
                     Thread.Sleep(1);
                 }
-                // TODO Send close message to connected clients.
+                // TODO Send close message to server.
             });
             reactorThread.Start();
         }
