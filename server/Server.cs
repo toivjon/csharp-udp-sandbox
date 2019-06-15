@@ -37,14 +37,19 @@ namespace server
                     while (udpClient.Available != 0) {
                         IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
                         byte[] received = udpClient.Receive(ref ipEndPoint);
-                        Console.WriteLine("> " + Encoding.UTF8.GetString(received));
+                        clientIps.Add(ipEndPoint);
+                        string message = Encoding.UTF8.GetString(received);
+                        Console.WriteLine("> " + message);
+                        outgoingQueue.Enqueue(message);
                     }
 
                     // Send outgoing messages to connected clients.
                     while (!outgoingQueue.IsEmpty) {
                         if (outgoingQueue.TryDequeue(out string message)) {
                             byte[] bytes = Encoding.UTF8.GetBytes(message);
-                            udpClient.Send(bytes, bytes.Length);
+                            foreach (IPEndPoint clientIp in clientIps) {
+                                udpClient.Send(bytes, bytes.Length, clientIp);
+                            }
                         }
                     }
                     Thread.Sleep(1);
