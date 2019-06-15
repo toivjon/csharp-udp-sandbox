@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace client
 {
@@ -12,6 +13,9 @@ namespace client
 
         // The UDP client abstraction for the UDP communication.
         private UdpClient udpClient;
+        
+        // The thread used by the reactor to capture network messages.
+        private Thread reactorThread;
 
         public Client() {
             this.serverIp = new IPEndPoint(IPAddress.Any, 0);
@@ -19,20 +23,27 @@ namespace client
         }
 
         public void run(string host, int port) {
-            udpClient.Connect(host, port);
-            Byte[] outgoing = Encoding.UTF8.GetBytes("Hello from client!");
-            udpClient.Send(outgoing, outgoing.Length);
-            byte[] incoming = udpClient.Receive(ref serverIp);
-            udpClient.Close();
-
-            Console.WriteLine("Received data: " + Encoding.UTF8.GetString(incoming));
+            reactorThread = new Thread(() => {
+                while (true) {
+                    // TODO Ping each connected client.
+                    // TODO Receive incoming messages.
+                    // TODO Send outgoing messages.
+                    Thread.Sleep(1);
+                }
+                // TODO Send close message to connected clients.
+            });
+            reactorThread.Start();
         }
 
+        public void close() {
+            reactorThread.Abort();
+        }
         static void Main(string[] args) {
             Client client = new Client();
             client.run("localhost", 28018);
 
             Console.ReadKey();
+            client.close();
         }
     }
 }
