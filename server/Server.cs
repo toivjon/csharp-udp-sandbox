@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -18,9 +19,13 @@ namespace server
         // The thread used by the reactor to capture network messages.
         private Thread reactorThread;
 
+        // The queue containing data that is going to be distributed to clients.
+        private ConcurrentQueue<string> outgoingQueue;
+
         public Server() {
             this.clientIps = new HashSet<IPEndPoint>();
             this.udpClient = new UdpClient(28018);
+            this.outgoingQueue = new ConcurrentQueue<string>();
         }
 
         public void Run() {
@@ -35,7 +40,13 @@ namespace server
                         Console.WriteLine("> " + Encoding.UTF8.GetString(received));
                     }
 
-                    // TODO Send outgoing messages.
+                    // Send outgoing messages to connected clients.
+                    while (!outgoingQueue.IsEmpty) {
+                        if (outgoingQueue.TryDequeue(out string message)) {
+                            byte[] bytes = Encoding.UTF8.GetBytes(message);
+                            udpClient.Send(bytes, bytes.Length);
+                        }
+                    }
                     Thread.Sleep(1);
                 }
                 // TODO Send close message to connected clients.
