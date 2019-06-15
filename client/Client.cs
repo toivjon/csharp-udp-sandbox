@@ -25,7 +25,7 @@ namespace client
         public void Run(string host, int port) {
             reactorThread = new Thread(() => {
                 while (true) {
-                    // TODO Ping each connected client.
+                    // TODO Ping server.
                     // TODO Receive incoming messages.
                     // TODO Send outgoing messages.
                     Thread.Sleep(1);
