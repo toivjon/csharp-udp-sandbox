@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
+using shared;
 
 namespace client
 {
@@ -16,11 +18,11 @@ namespace client
         private Thread reactorThread;
 
         // The queue containing data that is going to be sent to server.
-        private ConcurrentQueue<string> outgoingQueue;
+        private ConcurrentQueue<Message> outgoingQueue;
 
         public Client() {
             this.udpClient = new UdpClient();
-            this.outgoingQueue = new ConcurrentQueue<string>();
+            this.outgoingQueue = new ConcurrentQueue<Message>();
         }
 
         public void Run(string host, int port) {
@@ -38,8 +40,9 @@ namespace client
 
                     // Send all waiting outgoing messages to server.
                     while (!outgoingQueue.IsEmpty) {
-                        if (outgoingQueue.TryDequeue(out string message)) {
-                            byte[] bytes = Encoding.UTF8.GetBytes(message);
+                        if (outgoingQueue.TryDequeue(out Message message)) {
+                            string msgJson = JsonConvert.SerializeObject(message);
+                            byte[] bytes = Encoding.UTF8.GetBytes(msgJson);
                             udpClient.Send(bytes, bytes.Length);
                         }
                     }
@@ -54,8 +57,9 @@ namespace client
             reactorThread.Abort();
         }
 
-        public void Send(string message)
-        {
+        public void Send(string text) {
+            Message message = new Message();
+            message.Text = text;
             outgoingQueue.Enqueue(message);
         }
 
