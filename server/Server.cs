@@ -67,7 +67,7 @@ namespace server
             reactorThread.Abort();   
         }
 
-        static void Main(string[] args) {
+        static void Main() {
             Server server = new Server();
             server.Run();
 
