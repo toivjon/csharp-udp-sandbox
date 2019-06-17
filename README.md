@@ -5,6 +5,7 @@ A sandbox to test C# UDP features.
 This sandbox solution is split into three projects.
 
 | Project | Description |
+| ------- | ----------- |
 | client  | A console UDP client application. |
 | server  | A console UDP server application. |
 | shared  | A library containing shared stuff between the applications. |
