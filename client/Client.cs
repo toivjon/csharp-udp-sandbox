@@ -35,7 +35,9 @@ namespace client
                     while (udpClient.Available != 0) {
                         IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
                         byte[] received = udpClient.Receive(ref ipEndPoint);
-                        Console.WriteLine("> " + Encoding.UTF8.GetString(received));
+                        string json = Encoding.UTF8.GetString(received);
+                        Message message = JsonConvert.DeserializeObject<Message>(json);
+                        Console.WriteLine("> " + message.Text);
                     }
 
                     // Send all waiting outgoing messages to server.

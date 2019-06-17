@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using shared;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
@@ -20,12 +22,12 @@ namespace server
         private Thread reactorThread;
 
         // The queue containing data that is going to be distributed to clients.
-        private ConcurrentQueue<string> outgoingQueue;
+        private ConcurrentQueue<Message> outgoingQueue;
 
         public Server() {
             this.clientIps = new HashSet<IPEndPoint>();
             this.udpClient = new UdpClient(28018);
-            this.outgoingQueue = new ConcurrentQueue<string>();
+            this.outgoingQueue = new ConcurrentQueue<Message>();
         }
 
         public void Run() {
@@ -38,15 +40,17 @@ namespace server
                         IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
                         byte[] received = udpClient.Receive(ref ipEndPoint);
                         clientIps.Add(ipEndPoint);
-                        string message = Encoding.UTF8.GetString(received);
-                        Console.WriteLine("> " + message);
+                        string json = Encoding.UTF8.GetString(received);
+                        Message message = JsonConvert.DeserializeObject<Message>(json);
+                        Console.WriteLine("> " + message.Text);
                         outgoingQueue.Enqueue(message);
                     }
 
                     // Send outgoing messages to connected clients.
                     while (!outgoingQueue.IsEmpty) {
-                        if (outgoingQueue.TryDequeue(out string message)) {
-                            byte[] bytes = Encoding.UTF8.GetBytes(message);
+                        if (outgoingQueue.TryDequeue(out Message message)) {
+                            string json = JsonConvert.SerializeObject(message);
+                            byte[] bytes = Encoding.UTF8.GetBytes(json);
                             foreach (IPEndPoint clientIp in clientIps) {
                                 udpClient.Send(bytes, bytes.Length, clientIp);
                             }
