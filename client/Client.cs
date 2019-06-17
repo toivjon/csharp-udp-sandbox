@@ -9,7 +9,7 @@ using shared;
 
 namespace client
 {
-    class Client
+    class Client : BaseApplication
     {
         // The UDP client abstraction for the UDP communication.
         private UdpClient udpClient;
@@ -17,12 +17,8 @@ namespace client
         // The thread used by the reactor to capture network messages.
         private Thread reactorThread;
 
-        // The queue containing data that is going to be sent to server.
-        private ConcurrentQueue<Message> outgoingQueue;
-
-        public Client() {
+        public Client() : base() {
             this.udpClient = new UdpClient();
-            this.outgoingQueue = new ConcurrentQueue<Message>();
         }
 
         public void Run(string host, int port) {
@@ -41,8 +37,8 @@ namespace client
                     }
 
                     // Send all waiting outgoing messages to server.
-                    while (!outgoingQueue.IsEmpty) {
-                        if (outgoingQueue.TryDequeue(out Message message)) {
+                    while (!OutgoingQueue.IsEmpty) {
+                        if (OutgoingQueue.TryDequeue(out Message message)) {
                             string msgJson = JsonConvert.SerializeObject(message);
                             byte[] bytes = Encoding.UTF8.GetBytes(msgJson);
                             udpClient.Send(bytes, bytes.Length);
@@ -62,7 +58,7 @@ namespace client
         public void Send(string text) {
             Message message = new Message();
             message.Text = text;
-            outgoingQueue.Enqueue(message);
+            OutgoingQueue.Enqueue(message);
         }
 
         static void Main(string[] args) {

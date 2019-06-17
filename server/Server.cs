@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace server
 {
-    class Server
+    class Server : BaseApplication
     {
         // The set containing the addresses of all connected clients.
         private HashSet<IPEndPoint> clientIps;
@@ -21,13 +21,9 @@ namespace server
         // The thread used by the reactor to capture network messages.
         private Thread reactorThread;
 
-        // The queue containing data that is going to be distributed to clients.
-        private ConcurrentQueue<Message> outgoingQueue;
-
-        public Server() {
+        public Server() : base() {
             this.clientIps = new HashSet<IPEndPoint>();
             this.udpClient = new UdpClient(28018);
-            this.outgoingQueue = new ConcurrentQueue<Message>();
         }
 
         public void Run() {
@@ -43,12 +39,12 @@ namespace server
                         string json = Encoding.UTF8.GetString(received);
                         Message message = JsonConvert.DeserializeObject<Message>(json);
                         Console.WriteLine("> " + message.Text);
-                        outgoingQueue.Enqueue(message);
+                        OutgoingQueue.Enqueue(message);
                     }
 
                     // Send outgoing messages to connected clients.
-                    while (!outgoingQueue.IsEmpty) {
-                        if (outgoingQueue.TryDequeue(out Message message)) {
+                    while (!OutgoingQueue.IsEmpty) {
+                        if (OutgoingQueue.TryDequeue(out Message message)) {
                             string json = JsonConvert.SerializeObject(message);
                             byte[] bytes = Encoding.UTF8.GetBytes(json);
                             foreach (IPEndPoint clientIp in clientIps) {
