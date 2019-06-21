@@ -16,11 +16,13 @@ namespace client
         }
 
         static void Main(string[] args) {
+            Console.Write("Enter your name: ");
+            string username = Console.ReadLine();
+
             Client client = new Client();
             client.Connect("localhost", 28018);
-
             for (int i = 0; i < 5; i++) {
-                string message = Console.ReadLine();
+                string message = $"[{DateTime.Now.Hour}:{DateTime.Now.Minute}] [{username}] " + Console.ReadLine();
                 client.OutgoingQueue.Enqueue(new Message() { Text = message });
             }
             client.Close();
